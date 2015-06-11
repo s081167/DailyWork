@@ -1,0 +1,36 @@
+public class ReverseLetters {
+	public ReverseLetters(){
+		
+	}
+	
+	public static char[] revers(String str){
+		char[] charArrFromStr = str.toCharArray();
+		int begin = 0;
+		int end = charArrFromStr.length-1;
+		char temChar = charArrFromStr[0];
+		
+		if(1==charArrFromStr.length){
+			return charArrFromStr;
+		}else{
+			while(begin<end){
+				temChar = charArrFromStr[begin];
+				charArrFromStr[begin] = charArrFromStr[end];
+				charArrFromStr[end] = temChar;
+				
+				begin++;
+				end--;
+			}
+		}
+		
+		return charArrFromStr;
+	}
+	
+	public static void main(String[] args) {
+		String str = "This is a test String";
+		char[] resultArr = revers(str);
+		
+		for(char item:resultArr){
+			System.out.print(item);
+		}
+	}
+}
