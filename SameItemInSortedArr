@@ -1,0 +1,45 @@
+import java.util.ArrayList;
+
+/**
+ * There are two sorted arrays, find the same items from these two arrays.
+ * @author Administrator
+ *
+ */
+public class SameItemInSortedArr {
+	private static ArrayList<Integer> sameItemsArr = new ArrayList<Integer>();
+	
+	public SameItemInSortedArr(){
+		
+	}
+	
+	public static ArrayList<Integer> getSameItem(int[] arrOne, int[] arrTwo){
+		
+		int arrOneLen = arrOne.length;
+		int arrTwoLen = arrTwo.length;
+		
+		for(int i=0, j=0; i<arrOneLen && j< arrTwoLen;){
+			if(arrOne[i] < arrTwo[j]){
+				i++;
+			}else if(arrOne[i] == arrTwo[j]){
+				sameItemsArr.add(arrOne[i]);
+				i++;
+				j++;
+			}else if(arrOne[i] > arrTwo[j]){
+				j++;
+			}
+		}
+		
+		return sameItemsArr;
+	}
+	
+	public static void main(String[] args) {
+		int[] arrOne = {1,2,3,4,5};
+		int[] arrTwo = {1,2,4,6,8,9,0};
+		
+		ArrayList<Integer> resultList = getSameItem(arrOne, arrTwo);
+		
+		for(Integer item:resultList){
+			System.out.println(item);
+		}
+	}
+}
