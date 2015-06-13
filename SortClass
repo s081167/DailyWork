@@ -1,0 +1,54 @@
+public class SortClass {
+	public static final int[] intArr={7,4,5,1,2,9,6,3,8,4,77};
+	
+	public SortClass(){
+		
+	}
+	
+	public int[] bubbleSort(int[] arr){
+		for(int i=0; i<arr.length-1; i++){
+			for(int j=0; j<arr.length-1-i; j++){
+				if(arr[j]<arr[j+1]){
+					int tempItem = arr[j];
+					arr[j] = arr[j+1];
+					arr[j+1] = tempItem;
+				}
+			}
+		}
+		
+		return arr;
+	}
+	
+	public int[] oneCircleBubbleSort(int[] arr){
+		while(true){
+			boolean isEnd = true;
+			
+			for(int i=0; i<arr.length-1; i++){
+				int firstItem = arr[i];
+				int secondItem = arr[i+1];
+				
+				if((firstItem<secondItem)){
+					arr[i] = secondItem;
+					arr[i+1] = firstItem;
+					isEnd = false;
+	                continue;
+	            } else if (i == arr.length - 1) { // 如果最后一个人元素的场合下 还没有发生可以交换的事件
+	                isEnd = true;
+	            }
+	        }
+	        if(isEnd) {break;}					
+		}
+		
+		return arr;
+	}
+	
+	public static void main(String[] args) {
+		SortClass sortClass = new SortClass();
+		
+		int[] arrAfterSort = sortClass.bubbleSort(intArr);
+		
+		for(int item:arrAfterSort){
+			System.out.println(item);
+		}
+	}
+}
