@@ -1,0 +1,131 @@
+package com.zhangfei.work201508.ESbatch;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+
+
+
+
+public class HttpESBatch implements IESBatch{
+    
+	@Override
+	public void sendToES(List<Person> personList) {
+        if (personList == null) {
+        	return;
+        }
+        if (personList.size() == 0) {
+        	return;
+        }
+        
+        URL url;
+        String responseDoc = "";
+        try {
+        	StringBuilder bulkRequestDocument = new StringBuilder();
+            for (Person person : personList) {
+            	bulkRequestDocument.append("{ \"index\": { \"_id\": \"" + person.getId() + "\" }}\n");
+            	bulkRequestDocument.append(person.getJsonStr() + "\n");
+            }
+
+            // Send the doc
+            String urlAddress = "http://localhost:9200/persons/person"; 
+            urlAddress += "/_bulk";
+            System.out.println("Preparing to make bulk index request to: " + urlAddress);
+            url = new URL(urlAddress);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "text/plain");
+            con.setUseCaches(false);
+            con.setDoInput(true);
+            con.setDoOutput(true);
+            con.connect();
+            
+            DataOutputStream output = null;
+
+            output = new DataOutputStream(con.getOutputStream());
+
+             /* Send the request data.*/
+			output.writeBytes(bulkRequestDocument.toString());
+			output.flush();
+			output.close();
+
+             /* Get response data.*/
+			String line = "";
+		
+		    BufferedReader input = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			while (null != (line = input.readLine())) {
+				responseDoc += line;
+			}
+			System.out.println("Completed processing bulk index response");
+			
+            
+			JSONObject responseObj = JSONObject.fromObject(responseDoc);
+	        JSONArray bulkResponseArray = responseObj.getJSONArray("items");
+	        int size = bulkResponseArray.size();
+	        JSONObject itemResponse = null;
+	        JSONObject itemIndexObj = null;
+	            
+	            
+	        String assetGuid = null;
+	        String statusMsg = null;
+	        for (int i = 0; i < size; i++) {
+	            itemResponse = bulkResponseArray.getJSONObject(i);
+	            itemIndexObj = itemResponse.getJSONObject("index");
+	            assetGuid = itemIndexObj.getString("_id");
+	            if (!Integer.toString(itemIndexObj.getInt("status")).startsWith("2")) {
+	                statusMsg = Integer.toString(itemIndexObj.getInt("status"));
+	            } else {
+	            	statusMsg = null;
+	            }
+	        }
+	            
+	    } catch (JSONException e) { 
+	    	System.out.println("Error occurred parsing bulk index response. Response shoudl be reviewed.");
+	    	System.out.println("Bulk index response: " + responseDoc);
+	    } catch (Exception e) {
+	    	System.out.println("SubmitBulkToES failure:" + e.getMessage());
+	        e.printStackTrace();
+	    } 
+	}
+	
+}
+
+
+
+
+package com.zhangfei.work201508.ESbatch;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BatchLuncher {
+	
+	public static List<Person> getPersonList(){
+        
+        List<Person> personList = new ArrayList<Person>();
+        String jsonPersonStr2 = "{\"personName\":\"China BJ2\",\"placeCd\":\"00022\"}";
+        Person person2 = new Person("person002", jsonPersonStr2);
+        personList.add(person2);
+        String jsonPersonStr3 = "{\"personName\":\"China BJ3\",\"placeCd\":\"00023\"}";
+        Person person3 = new Person("person003", jsonPersonStr3);
+        personList.add(person3);
+        String jsonPersonStr4 = "{\"personName\":\"China BJ4\",\"placeCd\":\"00024\"}";
+        Person person4 = new Person("person004", jsonPersonStr4);
+        personList.add(person4);
+        
+		return personList;
+	}
+
+	public static void main(String[] args) {
+		HttpESBatch esBatch = new HttpESBatch();
+		esBatch.sendToES(getPersonList());
+		System.out.println("add...............Done");
+	}
+}
